@@ -1,0 +1,36 @@
+library(MCMCglmm) 
+library(tidyverse) 
+library(broom) 
+library(nadiv)
+
+### Bivariate mixed model estimates the among-individual variance for each response variable and the covariance between them
+
+#first let's create a prior. here we use a paramter-expanded prior that should be uninformative for our model
+prior_E_B_1px = list(R = list(V = diag(2), nu = 0.002), G = list(G1 = list(V = diag(2), nu = 2, alpha.mu = rep(0,2),alpha.V = diag(25^2,2,2))))
+
+#now write model with scaled response variables (centered around mean and standardized to units of 1 phenotypic standard deviation)
+#bind response variables together using cbind
+#use trait to specify that this is a multivariate model
+#trait-1 tells the model to give us a distinct intercept for each trait
+#interact trait with our fixed effects so that we get estimates for the effect of these variables on each of our behaviors
+mcmc_E_B_us <- MCMCglmm(cbind(scale(exploration), scale(boldness)) ~ trait-1 + trait:scale(assay_rep, scale = FALSE) + trait:scale(body_size), 
+                        random =~ us(trait):ID, #calculate the variance in exploration due to differences among indvidiuals, the variance in boldness due to differences among individuals and the covariance between these varainces
+                        rcov =~ us(trait):units, #within individual variation
+                        family = c("gaussian", "gaussian"), 
+                        prior = prior_E_B_1px, 
+                        nitt = 420000, #total number of iterations
+                        burnin = 20000, #initial iterations to be discarded as the model starts to converge
+                        thin = 100, #number of iterations to discard in between successive stored samples (reduces autocorrelation in sampling)
+                        verbose = TRUE, 
+                        data = as.data.frame(df_syndrome))
+
+plot(mcmc_E_B_us$VCV)
+
+##normally you should use diagnostic tests before accpeting final results
+#geweke.diag and gelman.diag
+
+
+#g-structure contains info on the random effects (co)variances
+#r-structure contains info on the residual (co)variances
+#location effects is fixed effects results
+summary(mcmc_E_B_us)

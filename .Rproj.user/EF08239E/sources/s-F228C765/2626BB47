@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1565393718006.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2214009225",
+    "id" : "2626BB47",
+    "lastKnownWriteTime" : 1565807350,
+    "last_content_update" : 1565807350331,
+    "path" : "~/Desktop/Striders/Striders/format data.R",
+    "project_path" : "format data.R",
+    "properties" : {
+        "cursorPosition" : "1,8",
+        "scrollLine" : "0",
+        "tempName" : "Untitled2"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 9,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

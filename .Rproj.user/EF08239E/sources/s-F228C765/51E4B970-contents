@@ -1,0 +1,54 @@
+library(lme4) 
+library(MCMCglmm) 
+library(tidyverse) 
+library(broom) 
+library(nadiv)
+
+df_syndrome <- read_csv("syndrome.csv")
+
+###First let's see how a univariate model works
+lmer_b <- lmer(boldness ~ scale(assay_rep, scale=FALSE) + scale(body_size) + (1|ID), data = df_syndrome)
+
+plot(lmer_b)
+qqnorm(residuals(lmer_b)) #what does this tell us?
+hist(residuals(lmer_b))
+
+summary(lmer_b) #we're interested in the random effects section of the summary specifically the variance component
+
+##compute repeatability (personality) by dividing the variance in the trait due to difference among individuals (Vid) by the total phenotypic variance adter account for the fixed effects (Vid + Vresiduals)
+
+#use broom to do this automatically
+rep_bold <- tidy(lmer_b, effects = "ran_pars", scales = "vcov") %>%
+  select(group, estimate) %>%
+  spread(group, estimate) %>%
+  mutate(repeatability = ID/(ID + Residual))
+rep_bold
+
+##do the same for exploration
+lmer_e <- lmer(exploration ~ scale(assay_rep, scale = FALSE) + scale(body_size) + (1|ID), data = df_syndrome)
+
+#calculate repeatability
+rep_expl <- tidy(lmer_e, effects = "ran_pars", scales = "vcov") %>%
+  select(group, estimate) %>%
+  spread(group, estimate) %>%
+  mutate(repeatbility = ID/(ID+Residual))
+rep_expl
+
+##Correlations using BLUPS
+
+#create two data frames of individual predictions extracted from model fits (for boldness and exploration) then join them
+df_BLUPS_B <- tibble(ID = row.names(ranef(lmer_b)$ID),
+                         BLUP_B = ranef(lmer_b)$ID[,"(Intercept)"])
+df_BLUPS_E <- tibble(ID = row.names(ranef(lmer_e)$ID),
+                         BLUP_E = ranef(lmer_e)$ID[,"(Intercept)"])
+df_BLUPS_EB <- left_join(df_BLUPS_E, df_BLUPS_B,
+                         by = "ID")
+
+#plot
+plot(df_BLUPS_EB$BLUP_B ~ df_BLUPS_EB$BLUP_E)
+
+#perform a correlation test of these traits 
+cor.test(df_BLUPS_EB$BLUP_E, df_BLUPS_EB$BLUP_B)
+
+##Using BLUPs this way leads to anticonservative significance tests because the rror inherent in their prediction is not carried forward from the lmer models to the subsequent analysis
+

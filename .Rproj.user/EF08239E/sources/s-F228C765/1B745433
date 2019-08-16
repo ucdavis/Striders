@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1565806784773.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "1B745433",
+    "lastKnownWriteTime" : -1941058778697485617,
+    "last_content_update" : 1565806784773,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "id" : "6f9aa4a2914341ffa741724c9becc065",
+        "name" : "mcmc_E_B_us",
+        "title" : "mcmc_E_B_us"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "object_explorer"
+}
