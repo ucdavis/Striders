@@ -63,13 +63,14 @@ test = df_mod %>% group_by(groupID, trial, id) %>%
   summarize( n_treatment = length(unique(Treatment)), 
              n_sex = length(unique(sex))) %>% ungroup()
 
-save(df_mod, file = "./df_mod.rdata")
-load(file = "./df_mod.rdata")
+
 
 #fix issues with tanks who were assigned large treatment even though they are small 
+df_mod$Treatment <- as.character(df_mod$Treatment)
 df_mod$Treatment <- ifelse(df_mod$groupID == "groupT20 144_157-G_160-R_161-B_39_97", "small", df_mod$Treatment)
 
 #fix sex for individual 145-Y who was assigned male for one entry
+df_mod$sex <- as.character(df_mod$sex)
 df_mod$sex <- ifelse(df_mod$id == "145-Y", "F", df_mod$sex)
 
 
@@ -88,3 +89,5 @@ df_mod = df_mod %>% group_by(groupID, trial, id) %>%
 #now, to filter to males
 df_mod = df_mod %>% filter(sex == "m")
 
+save(df_mod, file = "./df_mod.rdata")
+load(file = "./df_mod.rdata")
