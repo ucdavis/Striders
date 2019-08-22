@@ -1,6 +1,4 @@
-
-#data is a water striders file that comes from striders something
-#hopefully emily remembers what it is :)
+data <- read.csv("data.csv")
 
 df = data
 
@@ -77,7 +75,7 @@ df_mod$sex <- ifelse(df_mod$id == "145-Y", "F", df_mod$sex)
 #and so now we want to calculate the proportion of time active and mating, within a day,
 #for each male, for each of its observed trials, for each of its observed groups
 #but remember that trial is the same thing as day
-df_mod = df_mod %>% group_by(groupID, trial, id) %>% 
+bloop = df_mod %>% group_by(groupID, trial, id) %>% 
   summarize(prop_active = sum(activity, na.rm = T)/sum(!is.na(activity)),
             prop_mating = sum(mating, na.rm = T)/sum(!is.na(mating)),
             sex = unique(sex),
@@ -86,7 +84,7 @@ df_mod = df_mod %>% group_by(groupID, trial, id) %>%
             tank = unique(tank)) %>% ungroup()
 
 
-#now, to filter to males
+#now, to filter to males ###saving this for later because our data frame is messed up!
 df_mod = df_mod %>% filter(sex == "m")
 
 save(df_mod, file = "./df_mod.rdata")
