@@ -1,5 +1,21 @@
 data <- read.csv("data.csv")
 
+
+###change mating to binary
+data$mating <- ifelse(data$mating == "N" | data$mating == "C" | data$mating == "DEAD" |data$mating == "Dead?" |data$mating == "?" |data$mating == "<NA>" | data$mating == "OVI" |data$mating == "v" |data$mating == "ES" |data$mating == "O" |data$mating == "V", "0", "1")
+
+
+###change activity to binary
+data$activity <- ifelse(data$activity == "1", "1", "0")
+
+
+###change behavior to binary
+data$behavior <- ifelse(data$behavior == "W" | data$behavior == "WC" | data$behavior == "WES" | data$behavior == "WF" , "1", "0")
+
+
+###edit tank so that all tanks are numbers only
+
+
 df = data
 
 df = df %>% group_by(date, tank, time) %>% 
@@ -62,27 +78,40 @@ test = df_mod %>% group_by(groupID, trial, id) %>%
              n_sex = length(unique(sex))) %>% ungroup()
 
 
-
 #fix issues with tanks who were assigned large treatment even though they are small 
 df_mod$Treatment <- as.character(df_mod$Treatment)
 df_mod$Treatment <- ifelse(df_mod$groupID == "groupT20 144_157-G_160-R_161-B_39_97", "small", df_mod$Treatment)
 
 #fix sex for individual 145-Y who was assigned male for one entry
 df_mod$sex <- as.character(df_mod$sex)
-df_mod$sex <- ifelse(df_mod$id == "145-Y", "F", df_mod$sex)
+df_mod$sex <- ifelse(df_mod$id == "145-Y" | df_mod$id == "98-Y", "F", df_mod$sex)
 
+
+###exclude striders who have multiple entries
+test = df_mod %>% group_by(date, id) %>%
+  summarize( n_treatment = length(unique(Treatment)), 
+             n_sex = length(unique(sex)), n_tank = length(unique(tank))) %>% ungroup()
+
+df_mod = test %>% filter(n_treatment > 1) %>%
+  select(-n_sex, -n_treatment, -n_tank) %>% #this line removes the n column, which we no longer need
+  anti_join(df_mod, ., by = c("date", "id"))
+
+df_mod = test %>% filter(n_tank > 1) %>%
+  select(-n_sex, -n_treatment, -n_tank) %>% #this line removes the n column, which we no longer need
+  anti_join(df_mod, ., by = c("date", "id"))
 
 #and so now we want to calculate the proportion of time active and mating, within a day,
 #for each male, for each of its observed trials, for each of its observed groups
 #but remember that trial is the same thing as day
-bloop = df_mod %>% group_by(groupID, trial, id) %>% 
-  summarize(prop_active = sum(activity, na.rm = T)/sum(!is.na(activity)),
+df_mod$behavior <- as.numeric(df_mod$behavior)
+df_mod$mating <- as.numeric(df_mod$mating)
+
+bloop = df_mod %>% group_by(date, id) %>% 
+  summarize(prop_behavior = sum(behavior, na.rm = T)/sum(!is.na(behavior)),
             prop_mating = sum(mating, na.rm = T)/sum(!is.na(mating)),
             sex = unique(sex),
-            date = unique(date),
             Treatment = unique(Treatment),
             tank = unique(tank)) %>% ungroup()
-
 
 #now, to filter to males ###saving this for later because our data frame is messed up!
 df_mod = df_mod %>% filter(sex == "m")
