@@ -6,7 +6,7 @@ library(nadiv)
 
 df_syndrome <- read_csv("syndrome.csv")
 
-###first assign an uninformative prior; later you should check that your model results 
+###first assign an uninformative prior; later you should check your model results 
 prior_E_B_1px = list(R = list(V = diag(2), nu = 0.002),
                      G = list(G1 = list(V = diag(2), nu = 2, alpha.mu = rep(0,2),
                                         alpha.V = diag(25^2,2,2))))
@@ -16,9 +16,9 @@ prior_E_B_1px = list(R = list(V = diag(2), nu = 0.002),
 ####set up model with bivariate response variable being boldness and exploration bound together using cbind
 #scale response variables as well (centered around the mean and standarized to units of 1 phenotypic standard deviation)
 mcmc_E_B_us <- MCMCglmm(cbind(scale(exploration), scale(boldness)) ~ trait-1 + trait:scale(assay_rep, scale = FALSE) + 
-                          trait:scale(body_size), #we use the trait keyword to specift that this is a multivariate model, trait-1 tells the model to give us a distinct intercept for each trait; we interact trait with the fixed effects so that we get estimates for the effect of these variables on each of our behaviors
-                        random =~ us(trait):ID, #tells the model to fit an unstrictured covariance matrix for the grouping variable ID, essentially we are calculating the variance in exploration due differences among individuals, the variance in boldness due to differences among individuals and the covariances between these variances
-                        rcov =~ us(trait):units, #residual variance = within individual variation, because we have repeated measures for both traits at the individual level we also set aan unstrictured covariance matris; finds the residual variance for each traits and allows these variances to covary
+                          trait:scale(body_size), #we use the trait keyword to specify that this is a multivariate model, trait-1 tells the model to give us a distinct intercept for each trait; we interact trait with the fixed effects so that we get estimates for the effect of these variables on each of our behaviors
+                        random =~ us(trait):ID, #tells the model to fit an unstructured covariance matrix for the grouping variable ID, essentially we are calculating the variance in exploration due differences among individuals, the variance in boldness due to differences among individuals and the covariances between these variances
+                        rcov =~ us(trait):units, #residual variance = within individual variation, because we have repeated measures for both traits at the individual level we also set aan unstructured covariance matrix; finds the residual variance for each trait and allows these variances to covary (???????)
                         family = c("gaussian","gaussian"), 
                         prior = prior_E_B_1px, #include model priors
                         nitt=420000, #total number of iterations
@@ -30,7 +30,7 @@ mcmc_E_B_us <- MCMCglmm(cbind(scale(exploration), scale(boldness)) ~ trait-1 + t
 
 plot(mcmc_E_B_us$VCV)
 
-## Note however that for any real analysis various other tests (e.g. of autocorrelation, robustness to different priors, and good model convergence using the geweke.diag and gelman.diag diagnostic functions) should be used before accepting final results.
+## Note that for any real analysis various other tests (e.g. of autocorrelation, robustness to different priors, and good model convergence using the geweke.diag and gelman.diag diagnostic functions) should be used before accepting final results.
 
 
 
